@@ -15,4 +15,10 @@ public class HomeController {
 		return ResponseEntity.ok().body("Hello World!! Home page!!");
 	}
 	
+	@GetMapping("/hi")
+	public ResponseEntity<String> hi()
+	{
+		return ResponseEntity.ok().body("Hii this is new API response");
+	}
+
 }
