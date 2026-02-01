@@ -1,16 +1,14 @@
 pipeline {
     agent any
-
     stages {
-
-        stage('Checkout') {
+        stage('Checkout Code') {
             steps {
                 git branch: 'main',
-                url: 'https://github.com/rohitambawade09/CICD_Project.git'
+                    url: 'https://github.com/rohitambawade09/CICD_Project.git'
             }
         }
 
-        stage('Build') {
+        stage('Maven Build') {
             steps {
                 sh 'mvn clean package -DskipTests'
             }
@@ -18,18 +16,47 @@ pipeline {
 
         stage('Docker Build') {
             steps {
-                sh 'docker build -t springboot-cicd .'
+                sh '''
+                docker build -t rohitambawade181/cicdproject:${BUILD_NUMBER} .
+                '''
             }
         }
 
-        stage('Deploy') {
+        stage('Docker Login') {
+            steps {
+                withCredentials([string(credentialsId: 'DockerId', variable: 'Dockerpwd')]) {
+                    sh "docker login -u rohitambawade181 -p ${Dockerpwd}"
+                }
+            }
+        }
+
+        stage('Docker Push') {
             steps {
                 sh '''
-                docker stop springboot-cicd || true
-                docker rm springboot-cicd || true
-                docker run -d -p 8080:8080 --name springboot-cicd springboot-cicd
+                docker push rohitambawade181/cicdproject:${BUILD_NUMBER}
                 '''
             }
+        }
+
+        stage('Deploy on EC2') {
+            steps {
+                sh 'docker run -d -p 8081:8080 rohitambawade181/cicdproject:${BUILD_NUMBER}'
+            }
+        }
+        
+        stage('Archving') {
+			steps {
+				archiveArtifacts '**/target/*.jar'
+			}
+		}
+    }
+
+    post {
+        success {
+            echo "Application deployed successfully on EC2!"
+        }
+        failure {
+            echo "Build or deployment failed"
         }
     }
 }
