@@ -1,5 +1,8 @@
 package com.src.controller;
 
+import java.util.HashMap;
+import java.util.Map;
+
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -19,6 +22,16 @@ public class HomeController {
 	public ResponseEntity<String> hi()
 	{
 		return ResponseEntity.ok().body("Hii this is new API response");
+	}
+	
+	@GetMapping("/newAPI")
+	public ResponseEntity<Map<String, Object>> newFunction()
+	{
+		Map<String, Object> map = new HashMap<>();
+		
+		map.put("response", "New code deployed for the pipeline project");
+		
+		return ResponseEntity.ok().body(map);
 	}
 
 }
